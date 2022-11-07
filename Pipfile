@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"mastodon.py" = "*"
+python-dotenv = "*"
+pendulum = "*"
+bs4 = "*"
+lxml = "*"
+colorama = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
