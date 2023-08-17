@@ -16,10 +16,10 @@ post_log = JSON_DIR / 'post_log.json'
 
 
 # Template content
-post_log_template = {
-    "last_post_date": False,
-    "last_post_epoch": False
-}
+post_log_template = '''{
+    "last_post_date": false,
+    "last_post_epoch": false
+}'''
 
 
 if __name__ == "__main__":
