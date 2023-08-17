@@ -2,6 +2,10 @@
 # -*- coding: UTF-8 -*-
 from mastodon import Mastodon
 from time import sleep
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import random
+from tabulate import tabulate
 
 from dleveryfriday._args import args
 from dleveryfriday import _config, _vars, file_io, datetimefuncs
@@ -18,21 +22,79 @@ m_auth = Mastodon(
     api_base_url=_config.config['base_url']
 )
 
-def post(text, media_ids=None):
+
+def update_scheduled_post(post_id, new_date, new_time):
+    # TODO Denne må utbedres
+    _sched = datetimefuncs.make_dt(f'{new_date} {new_time}')
+    print(type(_sched))
+    print(_sched)
+    rescheduled = m_auth.scheduled_status_update(
+        id=post_id, scheduled_at=_sched
+    )
+    print(rescheduled)
+
+
+def list_scheduled_posts():
+    scheduled_posts = m_auth.scheduled_statuses()
+    if len(scheduled_posts) > 0:
+        log.debug('Listing scheduled posts...')
+        posts = {
+            'id': [],
+            'scheduled': [],
+            'text': [],
+            'attachment': []
+        }
+        for post in scheduled_posts:
+            posts['id'].append(post['id'])
+            posts['scheduled'].append(post['scheduled_at'])
+            posts['text'].append(post['params']['text'])
+            posts['attachment'].append(
+                'Yes' if len(post['media_attachments']) > 0 else 'No'
+            )
+        print(
+            tabulate(
+                posts, headers=['ID', 'Scheduled at', 'Post', 'Attachment?'],
+                numalign='center'
+            )
+        )
+    else:
+        print('No scheduled posts to list')
+
+
+def delete_all_scheduled_posts():
+    scheduled_posts = m_auth.scheduled_statuses()
+    if len(scheduled_posts) > 0:
+        for post in scheduled_posts:
+            log.log(f'Deleting post {post.id}')
+            m_auth.scheduled_status_delete(post.id)
+        log.log('Done')
+
+
+def post(text, media_ids=None, random_schedule=False):
     if args.test:
         post = m_auth.status_post(text, visibility='direct')
     elif args.dryrun:
         print(f'Posting: `{text}`')
         post = None
     else:
+        if random_schedule:
+            random_hour = random.randrange(3)
+            random_minute = random.randrange(60)
+            schedule = datetime.now().replace(
+                tzinfo=ZoneInfo('Europe/Oslo')
+            ) + timedelta(
+                hours=random_hour+2, minutes=random_minute
+            )
         if media_ids is not None:
             if args.test:
                 post = m_auth.status_post(
-                    text, media_ids=media_ids, visibility='direct'
+                    text, media_ids=media_ids, visibility='direct',
+                    scheduled_at=schedule if random_schedule else None
                 )
             else:
                 post = m_auth.status_post(
-                    text, media_ids=media_ids
+                    text, media_ids=media_ids,
+                    scheduled_at=schedule if random_schedule else None
                 )
         else:
             post = m_auth.status_post(text)
@@ -40,9 +102,14 @@ def post(text, media_ids=None):
 
 def get_media(file):
     log.log('Uploading media...')
-    post = m_auth.media_post(str(file), mime_type='video/mp4')
-    log.log(f'Done: {post}')
-    return post
+    if not args.dryrun:
+        post = m_auth.media_post(str(file), mime_type='video/mp4')
+        log.log(f'Done: {post}')
+        return post
+    else:
+        log.log('Dry run: Uploading media...')
+        return None
+
 
 def log_posted_date_now():
     post_log = file_io.read_json(_vars.post_log)
@@ -57,30 +124,48 @@ def log_posted_date_now():
 
 
 if __name__ == "__main__":
+    if args.delete_scheduled:
+        delete_all_scheduled_posts()
+        sys.exit()
+    if args.list_scheduled:
+        list_scheduled_posts()
+        sys.exit()
+    if args.reschedule:
+        update_scheduled_post(
+            args.reschedule[0], args.reschedule[1], args.reschedule[2]
+        )
+        sys.exit()
+
     post_log = file_io.read_json(_vars.post_log)
     date_now = datetimefuncs.get_dt()
-    if not args.dryrunforce:
+    if not args.forcefriday:
         dow = datetimefuncs.get_dt('dayofweek')
         log.debug(f'Got day of week: {dow}')
     else:
         dow = 5
-        log.debug('`dryrunforce`: Forced a friday')
+        log.debug('`forcefriday`: Forced a friday')
     if post_log['last_post_epoch'] is False:
         log_posted_date_now()
         post_log = file_io.read_json(_vars.post_log)
-    # If today is friday and there already is a post with the video,
-    # skip posting
-    # It's friday, my dudes
     if int(dow) != 5:
-        log.log('Today is not a friday')
+        log.log('Today is not a Friday')
     elif int(dow) == 5:
-        log.debug('Today is a new friday! Posting video')
+        # It's friday, my dudes
+        log.debug('Today is a new Friday! Posting video')
         _media = get_media(_vars.friday_vid)
-        print(f'_media: {_media}')
+        log.debug(f'_media: {_media}')
         sleep(5)
+        random_text = [
+            "It's Friday!",
+            "What do you know - it's Friday once again!",
+            "You made it! It's Friday!",
+            "Well, look at that - "
+        ]
         _post = post(
-            'It\'s friday!',
-            media_ids=_media.id
+            random_text[random.randint(0, len(random_text)-1)],
+            media_ids=_media.id if _media is not None else None,
+            random_schedule=True
         )
-        print(f'_post: {_post}')
+        log.debug(f'_post: {_post}')
+        #print(f'Post will be tooted at {}')
         log_posted_date_now()

@@ -8,6 +8,7 @@ name = "pypi"
 python-dotenv = "*"
 pendulum = "*"
 colorama = "*"
+tabulate = "*"
 
 [dev-packages]
 

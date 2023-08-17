@@ -73,10 +73,6 @@ def log(log_in, color=None, sameline=False):
             log_function(log_in, color, sameline=True)
         else:
             log_function(log_in, color, sameline=False)
-    if args.log_slow:
-        sleep(1)
-    if args.log_slower:
-        sleep(3)
 
 
 def log_more(log_in, color=None, sameline=False):
@@ -86,10 +82,6 @@ def log_more(log_in, color=None, sameline=False):
             log_function(log_in, color, sameline=True)
         else:
             log_function(log_in, color, sameline=False)
-    if args.log_slow:
-        sleep(1)
-    if args.log_slower:
-        sleep(3)
 
 
 def debug(log_in, sameline=False):
@@ -99,10 +91,6 @@ def debug(log_in, sameline=False):
             log_function(log_in, 'yellow', sameline=sameline)
         else:
             log_function(log_in, 'yellow')
-    if args.debug and args.log_slow:
-        sleep(1)
-    if args.log_slower:
-        sleep(3)
 
 
 def log_func_name():

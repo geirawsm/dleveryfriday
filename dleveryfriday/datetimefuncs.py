@@ -39,7 +39,20 @@ def make_dt(date_in):
             log.log_more('`date_in` is {}'.format(date_in))
             log.log_more(f'Got `d_len` {d_len}')
             log.log_more(f'd_split: {d_split}')
-            if d_len == 3:
+            if d_len == 2:
+                log.debug('d_len is 2')
+                if not re.match(r'^\d{2}[\.]\d{2}[\.]\d{2}', d_split[0]):
+                    log.debug('Not only dots as separators')
+                    _splitsymbols = re.match(r'^\d{2}([\-\.\_])\d{2}([\-\.\_])\d{2}', d_split[0])
+                    new_split = ''
+                    i = 3
+                    while i != 0:
+                        new_split += d_split[0].replace(_splitsymbols.group(i), '.')
+                        i -= 1
+                return pendulum.from_format(
+                    date_in, 'DD.MM.YYYY HH.mm', tz=tz
+                )
+            elif d_len == 3:
                 # Expecting `DD MM YYYY`, `YYY MM DD` or `DD MM YY`
                 if len(d_split[2]) == 4:
                     return pendulum.from_format(date_in, 'DD MM YYYY', tz=tz)
