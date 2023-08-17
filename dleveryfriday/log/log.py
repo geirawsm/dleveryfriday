@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 'Custom logging for the module'
 import sys
+import os
 from colorama import init, Fore, Style
 from pathlib import Path
 from dleveryfriday import _vars, datetimefuncs
@@ -12,10 +13,10 @@ from time import sleep
 init(autoreset=True)
 
 
-def log_function(log_in, color=None):
+def log_function(log_in, color=None, sameline=False):
     '''
     Include the name of the function in logging.
-    
+
     If no `color` is specified, it will highlight in green.
     '''
     get_dt = datetimefuncs.get_dt
@@ -30,42 +31,77 @@ def log_function(log_in, color=None):
             color = Fore.RED
     if args.log_print:
         log_out += '{color}{style}[ {function_name} ]{reset} '.format(
-            color = color,
-            style = Style.BRIGHT,
-            reset = Style.RESET_ALL,
-            function_name = function_name)
+            color=color,
+            style=Style.BRIGHT,
+            reset=Style.RESET_ALL,
+            function_name=function_name)
     else:
         log_out += '[ {} ] '.format(log_func_name())
     log_out += log_in
     if args.log_print:
-        print(log_out)
+        if sameline:
+            try:
+                max_cols, max_rows = os.get_terminal_size(0)
+            except (OSError):
+                max_cols = 0
+            msg_len = len(str(log_out))
+            rem_len = max_cols - msg_len - 2
+            print('{}{}'.format(
+                log_out, ' ' * rem_len
+            ), end='\r')
+        else:
+            print(log_out)
     else:
         log_out += '\n'
-        _logfilename = _vars.LOG_DIR / '{}.log'.format(get_dt('revdate', sep='-'))
+        _logfilename = _vars.LOG_DIR / \
+            '{}.log'.format(get_dt('revdate', sep='-'))
         write_log = open(_logfilename, 'a+', encoding="utf-8")
         write_log.write(log_out)
         write_log.close()
 
 
-def log(log_in, color=None):
+def log(log_in, color=None, sameline=False):
     '''
     Log the input `log_in`
-    
+
     Optional: Specify the color for highlighting the function name.
 
     Available colors: black, red, green, yellow, blue, magenta, cyan, white.
     '''
     if args.log:
-        log_function(log_in, color)
+        if sameline:
+            log_function(log_in, color, sameline=True)
+        else:
+            log_function(log_in, color, sameline=False)
     if args.log_slow:
+        sleep(1)
+    if args.log_slower:
         sleep(3)
 
 
-def log_more(log_in, color=None):
+def log_more(log_in, color=None, sameline=False):
     '''Log the input `log_in`. Used as more verbose than `log`'''
     if args.log_more:
-        log_function(log_in, color)
+        if sameline:
+            log_function(log_in, color, sameline=True)
+        else:
+            log_function(log_in, color, sameline=False)
     if args.log_slow:
+        sleep(1)
+    if args.log_slower:
+        sleep(3)
+
+
+def debug(log_in, sameline=False):
+    '''Log debugging info. Debug is always yellow'''
+    if args.debug:
+        if sameline:
+            log_function(log_in, 'yellow', sameline=sameline)
+        else:
+            log_function(log_in, 'yellow')
+    if args.debug and args.log_slow:
+        sleep(1)
+    if args.log_slower:
         sleep(3)
 
 

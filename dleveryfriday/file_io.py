@@ -99,7 +99,7 @@ def ensure_file(file_path: str, file_template=False):
         except:
             pass
     # Ooooh, this is a scary one. Don't overwrite the file unless it's empty
-    log.log_more('{} size: {}'.format(file_path, file_size(file_path)))
+    log.debug('{} size: {}'.format(file_path, file_size(file_path)))
     # Create the file if it doesn't exist
     if not file_size(file_path):
         log.log_more('File not found, creating: {}'.format(file_path))

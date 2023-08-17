@@ -1,3 +1,7 @@
+# Project specific
+.vscode/launch.json
+dleveryfriday/json/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

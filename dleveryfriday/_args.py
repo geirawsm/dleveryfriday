@@ -21,10 +21,20 @@ logging_args.add_argument('--log-print', '-lp',
                           default=False,
                           dest='log_print')
 logging_args.add_argument('--log-slow', '-ls',
-                          help='Wait 3 seconds after each logging',
+                          help='Wait 1 second after each logging',
                           action='store_true',
                           default=False,
                           dest='log_slow')
+logging_args.add_argument('--log-slower', '-lss',
+                          help='Wait 3 seconds after each logging',
+                          action='store_true',
+                          default=False,
+                          dest='log_slower')
+logging_args.add_argument('--debug', '-d',
+                          help='Log debug info',
+                          action='store_true',
+                          default=False,
+                          dest='debug')
 logging_args.add_argument('--highlight', '-hl',
                           help='Highlight chosen text in logging function naming',
                           action='store',
@@ -42,6 +52,11 @@ testing_args.add_argument('--dry-run', '-dr',
                           action='store_true',
                           default=False,
                           dest='dryrun')
+testing_args.add_argument('--dry-run-force', '-drf',
+                          help='Force completion of script whatever might stop it',
+                          action='store_true',
+                          default=False,
+                          dest='dryrunforce')
 args, unknown = parser.parse_known_args()
 
 

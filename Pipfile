@@ -7,11 +7,9 @@ name = "pypi"
 "mastodon.py" = "*"
 python-dotenv = "*"
 pendulum = "*"
-bs4 = "*"
-lxml = "*"
 colorama = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3"
