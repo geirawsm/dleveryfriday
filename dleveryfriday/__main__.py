@@ -72,7 +72,14 @@ def delete_all_scheduled_posts():
 
 def post(text, media_ids=None, random_schedule=False):
     if args.test:
-        post = m_auth.status_post(text, visibility='direct')
+        if media_ids is not None:
+            post = m_auth.status_post(
+                text, media_ids=media_ids, visibility='direct',
+            )
+        else:
+            post = m_auth.status_post(
+                text, media_ids=media_ids, visibility='direct'
+            )
     elif args.dryrun:
         print(f'Posting: `{text}`')
         post = None
@@ -85,6 +92,7 @@ def post(text, media_ids=None, random_schedule=False):
             ) + timedelta(
                 hours=random_hour+2, minutes=random_minute
             )
+            log.debug(f'Posting at {schedule}')
         if media_ids is not None:
             if args.test:
                 post = m_auth.status_post(
@@ -100,15 +108,17 @@ def post(text, media_ids=None, random_schedule=False):
             post = m_auth.status_post(text)
     return post
 
+
 def get_media(file):
     log.log('Uploading media...')
-    if not args.dryrun:
-        post = m_auth.media_post(str(file), mime_type='video/mp4')
-        log.log(f'Done: {post}')
-        return post
-    else:
+    if args.dryrun:
         log.log('Dry run: Uploading media...')
         return None
+    else:
+        post = m_auth.media_post(str(file), mime_type='video/mp4')
+        log.log(f'Done: {post}')
+        return post['id']
+
 
 
 def log_posted_date_now():
@@ -159,13 +169,15 @@ if __name__ == "__main__":
             "It's Friday!",
             "What do you know - it's Friday once again!",
             "You made it! It's Friday!",
-            "Well, look at that - "
+            "Well, look at that - it's Friday once again!"
         ]
         _post = post(
             random_text[random.randint(0, len(random_text)-1)],
-            media_ids=_media.id if _media is not None else None,
+            media_ids=_media,
             random_schedule=True
         )
         log.debug(f'_post: {_post}')
-        #print(f'Post will be tooted at {}')
+        #print('Post will be tooted at {}'.format(
+        #    _post['created_at'].as_timezone()
+        #))
         log_posted_date_now()
