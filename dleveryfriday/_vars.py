@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 STATIC_DIR = ROOT_DIR / 'static'
 JSON_DIR = ROOT_DIR / 'json'
+LOGS_DIR = ROOT_DIR / 'logs'
 
 # Files
 env_file = ROOT_DIR / '.env'

@@ -120,7 +120,6 @@ def get_media(file):
         return post['id']
 
 
-
 def log_posted_date_now():
     post_log = file_io.read_json(_vars.post_log)
     date_now = datetimefuncs.get_dt('date')
@@ -140,11 +139,6 @@ if __name__ == "__main__":
     if args.list_scheduled:
         list_scheduled_posts()
         sys.exit()
-    if args.reschedule:
-        update_scheduled_post(
-            args.reschedule[0], args.reschedule[1], args.reschedule[2]
-        )
-        sys.exit()
 
     post_log = file_io.read_json(_vars.post_log)
     date_now = datetimefuncs.get_dt()
@@ -159,7 +153,7 @@ if __name__ == "__main__":
         post_log = file_io.read_json(_vars.post_log)
     if int(dow) != 5:
         log.log('Today is not a Friday')
-    elif int(dow) == 5:
+    elif int(dow) == 5 or args.post_now:
         # It's friday, my dudes
         log.debug('Today is a new Friday! Posting video')
         _media = get_media(_vars.friday_vid)
@@ -169,15 +163,19 @@ if __name__ == "__main__":
             "It's Friday!",
             "What do you know - it's Friday once again!",
             "You made it! It's Friday!",
-            "Well, look at that - it's Friday once again!"
+            "Well, look at that - another Friday is here again!"
         ]
-        _post = post(
-            random_text[random.randint(0, len(random_text)-1)],
-            media_ids=_media,
-            random_schedule=True
-        )
+        if args.post_now:
+            _post = post(
+                random_text[random.randint(0, len(random_text)-1)],
+                media_ids=_media,
+                random_schedule=False
+            )
+        if not args.post_now:
+            _post = post(
+                random_text[random.randint(0, len(random_text)-1)],
+                media_ids=_media,
+                random_schedule=True
+            )
         log.debug(f'_post: {_post}')
-        #print('Post will be tooted at {}'.format(
-        #    _post['created_at'].as_timezone()
-        #))
         log_posted_date_now()

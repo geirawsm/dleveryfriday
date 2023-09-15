@@ -22,6 +22,11 @@ handling_args.add_argument('--reschedule', '-r',
                            nargs=3,
                            default=None,
                            dest='reschedule')
+handling_args.add_argument('--post-now', '-pn',
+                           help='Post right now',
+                           action='store_true',
+                           default=False,
+                           dest='post_now')
 
 logging_args = parser.add_argument_group('Logging')
 logging_args.add_argument('--log', '-l',
@@ -45,7 +50,8 @@ logging_args.add_argument('--debug', '-d',
                           default=False,
                           dest='debug')
 logging_args.add_argument('--highlight', '-hl',
-                          help='Highlight chosen text in logging function naming',
+                          help='Highlight chosen text in logging function '
+                               'naming',
                           action='store',
                           default=None,
                           dest='log_highlight')

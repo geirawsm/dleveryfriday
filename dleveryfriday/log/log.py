@@ -7,7 +7,6 @@ from colorama import init, Fore, Style
 from pathlib import Path
 from dleveryfriday import _vars, datetimefuncs
 from dleveryfriday._args import args
-from time import sleep
 
 # colorama specific reset routine
 init(autoreset=True)
@@ -53,7 +52,7 @@ def log_function(log_in, color=None, sameline=False):
             print(log_out)
     else:
         log_out += '\n'
-        _logfilename = _vars.LOG_DIR / \
+        _logfilename = _vars.LOGS_DIR / \
             '{}.log'.format(get_dt('revdate', sep='-'))
         write_log = open(_logfilename, 'a+', encoding="utf-8")
         write_log.write(log_out)
